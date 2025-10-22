@@ -57,9 +57,10 @@ struct Item {
  *
  * @note Specialization of std::hash for Item (note the empty brackets for the template)
  */
+
+
 template <>
 struct std::hash<Item> {
-
     /**
      * @brief Computes a hash value for an Item based on
      * using the standard hash for strings on the Item's name

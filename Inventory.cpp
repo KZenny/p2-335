@@ -164,9 +164,7 @@ bool Inventory<Comparator, Container>::discard(const std::string& name)
  *
  */
 template <class Comparator, class Container>
-std::unordered_set<Item>
-Inventory<Comparator, Container>::query(const Item& start,
-    const Item& end) const
+std::unordered_set<Item> Inventory<Comparator, Container>::query(const Item& start, const Item& end) const
 {
     if (Comparator::lessThan(end, start)) {
         return {};

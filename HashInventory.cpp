@@ -9,10 +9,7 @@
  * @tparam Comparator The comparison class for querying items
  */
 template <class Comparator>
-Inventory<Comparator, std::unordered_set<Item>>::Inventory()
-{
-    // your code here
-}
+Inventory<Comparator, std::unordered_set<Item>>::Inventory() : items_{std::unordered_set<Item>{}}, equipped_{nullptr}, weight_{0.0} {}
 
 /**
  * @brief Retrieves the value stored in `equipped_`
@@ -21,7 +18,7 @@ Inventory<Comparator, std::unordered_set<Item>>::Inventory()
 template <class Comparator>
 Item* Inventory<Comparator, std::unordered_set<Item>>::getEquipped() const
 {
-    // your code here
+    return equipped_;
 }
 
 /**
@@ -33,7 +30,7 @@ Item* Inventory<Comparator, std::unordered_set<Item>>::getEquipped() const
 template <class Comparator>
 void Inventory<Comparator, std::unordered_set<Item>>::equip(Item* itemToEquip)
 {
-    // your code here
+    equipped_ = itemToEquip;
 }
 
 /**
@@ -44,7 +41,10 @@ void Inventory<Comparator, std::unordered_set<Item>>::equip(Item* itemToEquip)
 template <class Comparator>
 void Inventory<Comparator, std::unordered_set<Item>>::discardEquipped()
 {
-    // your code here
+    if (equipped_ != nullptr) {
+        delete equipped_;
+        equipped_ = nullptr;
+    }
 }
 
 /**
@@ -54,7 +54,7 @@ void Inventory<Comparator, std::unordered_set<Item>>::discardEquipped()
 template <class Comparator>
 float Inventory<Comparator, std::unordered_set<Item>>::getWeight() const
 {
-    // your code here
+    return weight_;
 }
 
 /**
@@ -64,7 +64,7 @@ template <class Comparator>
 size_t
 Inventory<Comparator, std::unordered_set<Item>>::size() const
 {
-    // your code here
+    return items_.size();
 }
 
 /**
@@ -76,7 +76,7 @@ template <class Comparator>
 std::unordered_set<Item>
 Inventory<Comparator, std::unordered_set<Item>>::getItems() const
 {
-    // your code here
+    return items_;
 }
 
 /**
@@ -90,7 +90,13 @@ Inventory<Comparator, std::unordered_set<Item>>::getItems() const
 template <class Comparator>
 bool Inventory<Comparator, std::unordered_set<Item>>::pickup(const Item& target)
 {
-    // your code here
+    auto result = items_.insert(target); // returns a pair (iterator, bool)
+    if (result.second) { // insertion is successful
+        weight_ += target.weight_; // update weight_ to reflect the new item pickup
+        return true; // successful pickup
+    } else { //
+        return false; // item with same name already exists, not added to items_
+    }
 }
 
 /**
@@ -105,7 +111,14 @@ template <class Comparator>
 bool Inventory<Comparator, std::unordered_set<Item>>::discard(
     const std::string& itemName)
 {
-    // your code here
+    auto itr = items_.find(Item(itemName)); 
+    if (itr != items_.end()) { // item is found
+        weight_ -= itr->weight_; // update weight_ to reflect the item removal
+        items_.erase(itr); // remove the item from the inventory
+        return true; // successful removal
+    } else {
+        return false; // item not found, removal failed
+    }
 }
 
 /**
@@ -118,7 +131,8 @@ template <class Comparator>
 bool Inventory<Comparator, std::unordered_set<Item>>::contains(
     const std::string& itemName) const
 {
-    // your code here
+    auto itr = items_.find(Item(itemName));
+    return itr != items_.end();
 }
 
 /**
@@ -143,7 +157,18 @@ std::unordered_set<Item>
 Inventory<Comparator, std::unordered_set<Item>>::query(const Item& start,
     const Item& end) const
 {
-    // your code here
+    std::unordered_set<Item> result_set;
+    if(Comparator::lessThan(end, start)) {
+        return result_set; // empty set if end < start
+    }
+
+    for (const auto& item : items_) { // iterate through all items in inventory
+        if (Comparator::leq(start, item) && Comparator::leq(item, end)) { //  if item is within range, insert into result_set
+            result_set.insert(item);
+        }
+    }
+
+    return result_set; // return the set of items within the specified range
 }
 
 /**
@@ -153,5 +178,5 @@ Inventory<Comparator, std::unordered_set<Item>>::query(const Item& start,
 template <class Comparator>
 Inventory<Comparator, std::unordered_set<Item>>::~Inventory()
 {
-    // your code here
+    discardEquipped();
 }

@@ -149,13 +149,32 @@ bool Inventory<Comparator, Tree>::contains(const std::string& itemName) const
 template <class Comparator>
 std::unordered_set<Item> Inventory<Comparator, Tree>::query(const Item& start, const Item& end) const
 {
-    // Your code here.
+    std::unordered_set<Item> result_set;
+    if (Comparator::lessThan(end, start)) {
+        return result_set; // End item is less than start item, return empty set
+    }
+    queryHelper(start, end, items_.root(), result_set); // Helper function to perform the query
+    return result_set;
 }
 
 template <class Comparator>
 void Inventory<Comparator, Tree>::queryHelper(const Item& start, const Item& end, const Node* root, std::unordered_set<Item>& result) const
 {
-    // Your code here.
+    if (root == nullptr) { // Base case
+        return;
+    }
+
+    if (Comparator::leq(start, root->value_) && Comparator::leq(root->value_, end)) { // Current node is within range
+        result.insert(root->value_);
+    }
+
+    if (Comparator::lessThan(start, root->value_)) { //Current node is greater than start -> search left subtree for more items
+        queryHelper(start, end, root->left_, result);
+    }
+
+    if (Comparator::lessThan(root->value_, end)) { // Current node is less than end -> search right subtree for more items
+        queryHelper(start, end, root->right_, result);
+    }
 }
 
 /**
