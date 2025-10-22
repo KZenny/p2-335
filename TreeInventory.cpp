@@ -168,11 +168,11 @@ void Inventory<Comparator, Tree>::queryHelper(const Item& start, const Item& end
         result.insert(root->value_);
     }
 
-    if (Comparator::lessThan(start, root->value_)) { //Current node is greater than start -> search left subtree for more items
+    if (Comparator::leq(start, root->value_)) { //Current node is greater than start -> search left subtree for more items
         queryHelper(start, end, root->left_, result);
     }
 
-    if (Comparator::lessThan(root->value_, end)) { // Current node is less than end -> search right subtree for more items
+    if (Comparator::leq(root->value_, end)) { // Current node is less than end -> search right subtree for more items
         queryHelper(start, end, root->right_, result);
     }
 }
